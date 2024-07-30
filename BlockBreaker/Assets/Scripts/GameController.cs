@@ -3,6 +3,7 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Events;
 using TMPro;
+using UnityEngine.SceneManagement;
 
 public enum GameStates
 {
@@ -75,5 +76,8 @@ public class GameController : MonoBehaviour
         score += points;
         scoreTxt.text = "Score " + score;
     }
-
+    public void RestartGame()
+    {
+        SceneManager.LoadScene("Game");
+    }
 }
