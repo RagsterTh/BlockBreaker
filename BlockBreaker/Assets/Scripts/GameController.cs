@@ -1,20 +1,33 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.Events;
+using TMPro;
 
 public enum GameStates
 {
-    Ready, Play
+    Ready, Play, Less, Result
 }
 public class GameController : MonoBehaviour
 {
     public static GameController instance;
+    public UnityEvent OnLost;
+
+    public TMP_Text chancesTxt;
+    public TMP_Text scoreTxt;
     public GameObject ball;
+    public GameObject paddle;
+
+    [SerializeField] int chances, score;
     GameStates state;
+    Vector2 ballInitialPos;
     // Start is called before the first frame update
     void Awake()
     {
         instance = this;
+        ballInitialPos = ball.transform.localPosition;
+        chancesTxt.text = "Lives "+chances;
+        scoreTxt.text = "Score " + score;
     }
 
     // Update is called once per frame
@@ -35,7 +48,32 @@ public class GameController : MonoBehaviour
                 break;
             case GameStates.Play:
                 break;
+            case GameStates.Less:
+                chances--;
+                chancesTxt.text = "Lives " + chances;
+                if (chances <= 0)
+                {
+                    OnLost.Invoke();
+                    SetGameState(GameStates.Result);
+                } else
+                {
+                    ResetBall();
+                }
+                break;
         }
+    }
+    public void ResetBall()
+    {
+        ball.transform.SetParent(paddle.transform);
+        ball.transform.localPosition = ballInitialPos;
+        ball.SetActive(true);
+        ball.GetComponent<Ball>().ActiveTrail(false);
+        SetGameState(GameStates.Ready);
+    }
+    public void AddScore(int points)
+    {
+        score += points;
+        scoreTxt.text = "Score " + score;
     }
 
 }

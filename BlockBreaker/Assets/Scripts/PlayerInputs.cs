@@ -20,19 +20,22 @@ public class PlayerInputs : MonoBehaviour
     // Update is called once per frame
     void Update()
     {
-        paddle.position = new Vector2(Mathf.Clamp(mousePos.x, limitLeft.position.x, limitRight.position.x), paddle.position.y);
-    }
+        if (GameController.instance.GetGameState().Equals(GameStates.Result))
+            return;
 
-    private void OnMouseOver()
-    {
-        //paddle.position = new Vector2(mousePos.x, paddle.position.y);
-    }
-    private void OnMouseDown()
-    {
-        if (GameController.instance.GetGameState().Equals(GameStates.Ready))
+
+        paddle.position = new Vector2(Mathf.Clamp(mousePos.x, limitLeft.position.x, limitRight.position.x), paddle.position.y);
+
+        if (Input.GetButtonDown("Fire1"))
         {
-            ball.transform.SetParent(null);
-            ball.velocity = new Vector2(ballSpeed, ballSpeed);
+            if (GameController.instance.GetGameState().Equals(GameStates.Ready))
+            {
+                ball.transform.SetParent(null);
+                ball.GetComponent<Ball>().ActiveTrail(true);
+                int direction = Random.Range(-1, 2);
+                direction = direction == 0 ? -1 : direction;
+                ball.velocity = new Vector2(ballSpeed * direction, ballSpeed);
+            }
         }
     }
 }
