@@ -13,13 +13,14 @@ public class GameController : MonoBehaviour
 {
     public static GameController instance;
     public UnityEvent OnLost;
+    public UnityEvent OnWin;
 
     public TMP_Text chancesTxt;
     public TMP_Text scoreTxt;
     public GameObject ball;
     public GameObject paddle;
 
-    [SerializeField] int chances, score;
+    [SerializeField] int chances, score, bricksNumber;
     GameStates state;
     Vector2 ballInitialPos;
     // Start is called before the first frame update
@@ -61,6 +62,9 @@ public class GameController : MonoBehaviour
                     ResetBall();
                 }
                 break;
+            case GameStates.Result:
+                ball.GetComponent<Rigidbody2D>().velocity = Vector2.zero;
+                break;
         }
     }
     public void ResetBall()
@@ -79,5 +83,19 @@ public class GameController : MonoBehaviour
     public void RestartGame()
     {
         SceneManager.LoadScene("Game");
+    }
+
+    public void SetBricksNumber(int bricks)
+    {
+        bricksNumber = bricks;
+    }
+    public void SubtractBricksNumber()
+    {
+        bricksNumber--;
+        if(bricksNumber <= 0)
+        {
+            OnWin.Invoke();
+            SetGameState(GameStates.Result);
+        }
     }
 }

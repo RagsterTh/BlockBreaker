@@ -19,7 +19,8 @@ public class Brick : MonoBehaviour
     private void OnCollisionEnter2D(Collision2D collision)
     {
         GameController.instance.AddScore(points);
-        collision.gameObject.GetComponent<Rigidbody2D>().velocity *= 1.2f;
+        GameController.instance.SubtractBricksNumber();
+        collision.gameObject.GetComponent<Rigidbody2D>().velocity *= 1.03f;
         Destroy(gameObject);
     }
 }
