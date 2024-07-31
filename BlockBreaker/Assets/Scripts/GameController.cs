@@ -4,6 +4,7 @@ using UnityEngine;
 using UnityEngine.Events;
 using TMPro;
 using UnityEngine.SceneManagement;
+using UnityEditor.Experimental.RestService;
 
 public enum GameStates
 {
@@ -19,10 +20,16 @@ public class GameController : MonoBehaviour
     public TMP_Text scoreTxt;
     public GameObject ball;
     public GameObject paddle;
-
+    public static PlayerData playerData;
     [SerializeField] int chances, score, bricksNumber;
     GameStates state;
     Vector2 ballInitialPos;
+
+    [System.Serializable]
+    public class PlayerData
+    {
+        public int score;
+    }
     // Start is called before the first frame update
     void Awake()
     {
@@ -30,6 +37,7 @@ public class GameController : MonoBehaviour
         ballInitialPos = ball.transform.localPosition;
         chancesTxt.text = "Lives "+chances;
         scoreTxt.text = "Score " + score;
+        OnWin.AddListener(SaveToJson);
     }
 
     // Update is called once per frame
@@ -97,5 +105,14 @@ public class GameController : MonoBehaviour
             OnWin.Invoke();
             SetGameState(GameStates.Result);
         }
+    }
+    public void SaveToJson()
+    {
+        GameController.playerData = new PlayerData();
+        GameController.playerData.score = score;
+        string filePath = Application.persistentDataPath + "/PlayerData.json";
+        string playerData = JsonUtility.ToJson(GameController.playerData);
+        Debug.Log(filePath);
+        System.IO.File.WriteAllText(filePath, playerData);
     }
 }
