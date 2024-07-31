@@ -10,21 +10,29 @@ public enum GameStates
 {
     Ready, Play, Less, Result
 }
+public enum SoundTypes
+{
+    Hit, LaunchBall, DestroyBrick, Select, GameOver, LostBall, Win
+}
 public class GameController : MonoBehaviour
 {
     public static GameController instance;
     public UnityEvent OnLost;
     public UnityEvent OnWin;
+    public UnityEvent OnLostBall;
 
     public TMP_Text chancesTxt;
     public TMP_Text scoreTxt;
     public GameObject ball;
     public GameObject paddle;
+
+    AudioSource soundEffectSource;
+    [SerializeField] SoundEffects[] soundEffects;
     public static PlayerData playerData;
     [SerializeField] int chances, score, bricksNumber;
     GameStates state;
     Vector2 ballInitialPos;
-
+    Dictionary<SoundTypes, AudioClip> soundEffectsRegister = new Dictionary<SoundTypes, AudioClip>();
     [System.Serializable]
     public class PlayerData
     {
@@ -37,7 +45,24 @@ public class GameController : MonoBehaviour
         ballInitialPos = ball.transform.localPosition;
         chancesTxt.text = "Lives "+chances;
         scoreTxt.text = "Score " + score;
-        OnWin.AddListener(SaveToJson);
+        OnWin.AddListener(delegate
+        {
+            PlaySoundEffect(SoundTypes.Win);
+            SaveToJson();
+        });
+        OnLost.AddListener(delegate 
+        {
+            PlaySoundEffect(SoundTypes.GameOver);
+        });
+        OnLostBall.AddListener(delegate
+        {
+            PlaySoundEffect(SoundTypes.LostBall);
+        });
+        foreach (var item in soundEffects)
+        {
+            soundEffectsRegister.Add(item.soundType, item.soundClip);
+        }
+        soundEffectSource = GetComponent<AudioSource>();
     }
 
     // Update is called once per frame
@@ -67,6 +92,7 @@ public class GameController : MonoBehaviour
                     SetGameState(GameStates.Result);
                 } else
                 {
+                    OnLostBall.Invoke();
                     ResetBall();
                 }
                 break;
@@ -115,4 +141,18 @@ public class GameController : MonoBehaviour
         Debug.Log(filePath);
         System.IO.File.WriteAllText(filePath, playerData);
     }
+
+    #region Sound Effect
+
+    [System.Serializable]
+    public struct SoundEffects
+    {
+        public SoundTypes soundType;
+        public AudioClip soundClip;
+    }
+    public void PlaySoundEffect(SoundTypes soundType)
+    {
+        soundEffectSource.PlayOneShot(soundEffectsRegister[soundType]);
+    }
+    #endregion
 }
