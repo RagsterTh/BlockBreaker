@@ -5,10 +5,12 @@ using UnityEngine;
 public class Ball : MonoBehaviour
 {
     GameObject trail;
+    Rigidbody2D rb;
     // Start is called before the first frame update
     void Start()
     {
         trail = transform.GetChild(0).gameObject;
+        rb = GetComponent<Rigidbody2D>();
     }
 
     // Update is called once per frame
@@ -21,6 +23,9 @@ public class Ball : MonoBehaviour
         if (!collision.gameObject.CompareTag("Brick"))
         {
             GameController.instance.PlaySoundEffect(SoundTypes.Hit);
+        } else
+        {
+            rb.velocity *= 1.015f;
         }
     }
     public void ActiveTrail(bool active)

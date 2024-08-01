@@ -21,7 +21,6 @@ public class Brick : MonoBehaviour
         GameController.instance.PlaySoundEffect(SoundTypes.DestroyBrick);
         GameController.instance.AddScore(points);
         GameController.instance.SubtractBricksNumber();
-        collision.gameObject.GetComponent<Rigidbody2D>().velocity *= 1.03f;
         Destroy(gameObject);
     }
 }

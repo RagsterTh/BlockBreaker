@@ -32,8 +32,8 @@ public class PlayerInputs : MonoBehaviour
             {
                 ball.transform.SetParent(null);
                 ball.GetComponent<Ball>().ActiveTrail(true);
-                int direction = Random.Range(-1, 2);
-                direction = direction == 0 ? -1 : direction;
+                float direction = Random.Range(-0.5f, 0.5f);
+                direction = direction == 0 ? 0.5f : direction;
                 ball.velocity = new Vector2(ballSpeed * direction, ballSpeed);
             }
         }
