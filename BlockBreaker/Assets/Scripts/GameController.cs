@@ -23,6 +23,7 @@ public class GameController : MonoBehaviour
 
     public TMP_Text chancesTxt;
     public TMP_Text scoreTxt;
+    public TMP_Text highScoreTxt;
     public GameObject ball;
     public GameObject paddle;
 
@@ -42,9 +43,6 @@ public class GameController : MonoBehaviour
     void Awake()
     {
         instance = this;
-        ballInitialPos = ball.transform.localPosition;
-        chancesTxt.text = "Lives "+chances;
-        scoreTxt.text = "Score " + score;
         OnWin.AddListener(delegate
         {
             PlaySoundEffect(SoundTypes.Win);
@@ -63,6 +61,7 @@ public class GameController : MonoBehaviour
             soundEffectsRegister.Add(item.soundType, item.soundClip);
         }
         soundEffectSource = GetComponent<AudioSource>();
+        LoadFromJson();
     }
 
     // Update is called once per frame
@@ -116,7 +115,9 @@ public class GameController : MonoBehaviour
     }
     public void RestartGame()
     {
-        SceneManager.LoadScene("Game");
+        ResetBall();
+        ColumnGenerator.instance.GenerateColumns();
+        PlayGame();
     }
 
     public void SetBricksNumber(int bricks)
@@ -132,14 +133,31 @@ public class GameController : MonoBehaviour
             SetGameState(GameStates.Result);
         }
     }
+
     public void SaveToJson()
     {
-        GameController.playerData = new PlayerData();
-        GameController.playerData.score = score;
+        if(score > playerData.score)
+        {
+            highScoreTxt.text = "High Score " + score;
+            GameController.playerData.score = score;
+            string filePath = Application.persistentDataPath + "/PlayerData.json";
+            string playerData = JsonUtility.ToJson(GameController.playerData);
+            System.IO.File.WriteAllText(filePath, playerData);
+        }
+
+    }
+    public void LoadFromJson()
+    {
         string filePath = Application.persistentDataPath + "/PlayerData.json";
-        string playerData = JsonUtility.ToJson(GameController.playerData);
-        Debug.Log(filePath);
-        System.IO.File.WriteAllText(filePath, playerData);
+        if (System.IO.File.Exists(filePath))
+        {
+            string playerData = System.IO.File.ReadAllText(filePath);
+            GameController.playerData = JsonUtility.FromJson<PlayerData>(playerData);
+        } else
+        {
+            GameController.playerData = new PlayerData();
+        }
+        highScoreTxt.text = "High Score "+playerData.score;
     }
 
     #region Sound Effect
@@ -153,6 +171,17 @@ public class GameController : MonoBehaviour
     public void PlaySoundEffect(SoundTypes soundType)
     {
         soundEffectSource.PlayOneShot(soundEffectsRegister[soundType]);
+    }
+    #endregion
+    #region Title
+    public void PlayGame()
+    {
+        ballInitialPos = ball.transform.localPosition;
+        chances = 3;
+        score = 0;
+        SetGameState(GameStates.Ready);
+        chancesTxt.text = "Lives " + chances;
+        scoreTxt.text = "Score " + score;
     }
     #endregion
 }

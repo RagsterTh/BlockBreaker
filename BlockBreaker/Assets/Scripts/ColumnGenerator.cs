@@ -4,12 +4,28 @@ using UnityEngine;
 
 public class ColumnGenerator : MonoBehaviour
 {
+    public static ColumnGenerator instance;
     public GameObject brickPrefab;
+    List<GameObject> columnsList = new List<GameObject>();
     public int rows;
     public int columns;
-    Color[] colors = { Color.black, Color.blue, Color.green, Color.magenta, Color.cyan, Color.white };
+    Color[] colors = {Color.blue, Color.green, Color.magenta, Color.cyan, Color.white };
+    private void Awake()
+    {
+        instance = this;
+    }
     // Start is called before the first frame update
-    void Start()
+    void OnEnable()
+    {
+        GenerateColumns();
+    }
+
+    // Update is called once per frame
+    void Update()
+    {
+        
+    }
+    public void GenerateColumns()
     {
         for (int column = 0; column < columns; column++)
         {
@@ -22,13 +38,16 @@ public class ColumnGenerator : MonoBehaviour
                 brick.GetComponent<SpriteRenderer>().color = colors[row];
                 brick.transform.SetParent(temp.transform);
             }
+            columnsList.Add(temp);
         }
         GameController.instance.SetBricksNumber(rows * columns);
     }
-
-    // Update is called once per frame
-    void Update()
+    public void ResetColumns()
     {
-        
+        foreach (var item in columnsList)
+        {
+            Destroy(item);
+        }
+        columnsList = new List<GameObject>();
     }
 }
